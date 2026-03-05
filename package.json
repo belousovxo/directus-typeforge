@@ -55,7 +55,8 @@
     "cli": "node ./build/cli.js",
     "test": "jest",
     "types": "node ./scripts/types.js",
-    "update-system-fields": "ts-node scripts/update-system-fields.ts"
+    "update-system-fields": "ts-node scripts/update-system-fields.ts",
+    "prepare": "npm run build"
   },
   "types": "./build/index.d.ts",
   "name": "directus-typeforge",
