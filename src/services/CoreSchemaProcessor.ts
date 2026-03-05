@@ -386,6 +386,39 @@ export class CoreSchemaProcessor {
   }
 
   /**
+   * Check if a collection should be skipped from type generation
+   * Skips empty collections that are plural forms of other collections
+   */
+  private shouldSkipCollection(collectionName: string): boolean {
+    // Check if collection has any fields
+    const hasFields = this.snapshot.data.fields?.some(f => f.collection === collectionName) ?? false;
+    
+    // Check if collection has a schema (is a real DB table)
+    const hasSchema = this.snapshot.data.collections?.find(c => c.collection === collectionName)?.schema !== undefined;
+    
+    // If it has fields or is a real DB table, don't skip
+    if (hasFields || hasSchema) {
+      return false;
+    }
+    
+    // Check if this collection name is a plural form of another collection
+    const singularForm = pluralize.singular(collectionName);
+    
+    // If singular form is different and exists as a collection, skip this one
+    if (singularForm !== collectionName) {
+      const singularCollectionExists = this.snapshot.data.collections?.some(
+        c => c.collection === singularForm
+      );
+      
+      if (singularCollectionExists) {
+        return true; // Skip plural form when singular exists
+      }
+    }
+    
+    return false;
+  }
+
+  /**
    * Generate interface definitions for all collections
    */
   private generateTypeDefinitions(): void {
@@ -402,6 +435,11 @@ export class CoreSchemaProcessor {
       // Skip if already processed or in exclusion list
       if (this.processedCollections.has(collection.collection) || 
           excludedCollections.includes(collection.collection)) continue;
+      
+      // Skip empty collections (no fields) that are plural forms of other collections
+      if (this.shouldSkipCollection(collection.collection)) {
+        continue;
+      }
       
       // Mark as processed
       this.processedCollections.add(collection.collection);
