@@ -58,26 +58,26 @@ directus-typeforge [options]
 
 ## Available Options
 
-| Option                      | Alias | Description                                                                | Default          |
-| --------------------------- | ----- | -------------------------------------------------------------------------- | ---------------- |
-| `--snapshotFile`            | `-i`  | Path to schema snapshot file                                               | -                |
-| `--host`                    | `-h`  | Directus host URL                                                          | -                |
-| `--email`                   | `-e`  | Email for authentication                                                   | -                |
-| `--password`                | `-p`  | Password for authentication                                                | -                |
-| `--token`                   | `-t`  | Admin bearer token for authentication                                      | -                |
-| `--outFile`                 | `-o`  | Output file for TypeScript types                                           | -                |
-| `--typeName`                | `-n`  | Root type name                                                             | `ApiCollections` |
-| `--useTypeReferences`       | `-r`  | Use interface references for relation types                                | `true`           |
-| `--useTypes`                | `-u`  | Use 'type' instead of 'interface'                                          | `false`          |
-| `--makeRequired`            | `-m`  | Make all fields required (no optional '?' syntax)                          | `true`           |
-| `--includeSystemFields`     | `-s`  | Include all system fields in system collections                            | `true`           |
-| `--exportSystemCollections` | `-x`  | Export system collections in root schema                                   | `true`           |
-| `--resolveSystemRelations`  | `-y`  | Resolve system collection relationships (e.g. directus_files.folder)       | `true`           |
-| `--addTypedocNotes`         | `-d`  | Add JSDoc comments from field notes                                        | `true`           |
-| `--timestamp`               |       | Include generation timestamp in output header                              | `false`          |
-| `--debug`                   |       | Enable debug logging                                                       | `false`          |
-| `--logLevel`                |       | Set log level (error, warn, info, debug, trace)                            | `info`           |
-| `--logFile`                 |       | Path to write debug logs                                                   |                  |
+| Option                      | Alias | Description                                                          | Default          |
+| --------------------------- | ----- | -------------------------------------------------------------------- | ---------------- |
+| `--snapshotFile`            | `-i`  | Path to schema snapshot file                                         | -                |
+| `--host`                    | `-h`  | Directus host URL                                                    | -                |
+| `--email`                   | `-e`  | Email for authentication                                             | -                |
+| `--password`                | `-p`  | Password for authentication                                          | -                |
+| `--token`                   | `-t`  | Admin bearer token for authentication                                | -                |
+| `--outFile`                 | `-o`  | Output file for TypeScript types                                     | -                |
+| `--typeName`                | `-n`  | Root type name                                                       | `ApiCollections` |
+| `--useTypeReferences`       | `-r`  | Use interface references for relation types                          | `true`           |
+| `--useTypes`                | `-u`  | Use 'type' instead of 'interface'                                    | `false`          |
+| `--makeRequired`            | `-m`  | Make all fields required (no optional '?' syntax)                    | `true`           |
+| `--includeSystemFields`     | `-s`  | Include all system fields in system collections                      | `true`           |
+| `--exportSystemCollections` | `-x`  | Export system collections in root schema                             | `true`           |
+| `--resolveSystemRelations`  | `-y`  | Resolve system collection relationships (e.g. directus_files.folder) | `true`           |
+| `--addTypedocNotes`         | `-d`  | Add JSDoc comments from field notes                                  | `true`           |
+| `--timestamp`               |       | Include generation timestamp in output header                        | `false`          |
+| `--debug`                   |       | Enable debug logging                                                 | `false`          |
+| `--logLevel`                |       | Set log level (error, warn, info, debug, trace)                      | `info`           |
+| `--logFile`                 |       | Path to write debug logs                                             |                  |
 
 **only disable `--useTypeReferences` for very specific debugging, it will make
 all of your relational types break.**
@@ -90,7 +90,9 @@ TypeForge is optimized for compatibility with the Directus SDK by default:
   handles nullability internally
 - System fields are included by default to improve type checking with SDK
   operations
-- System collections (like `DirectusUser`, `DirectusFile`, `DirectusFolder`) are exported in the root schema by default, enabling proper relationship types (e.g., `user_created: string | DirectusUser`)
+- System collections (like `DirectusUser`, `DirectusFile`, `DirectusFolder`) are
+  exported in the root schema by default, enabling proper relationship types
+  (e.g., `user_created: string | DirectusUser`)
 - TypeDoc comments are added from field notes
 - Type references for relations are enabled
 
@@ -99,6 +101,9 @@ TypeForge is optimized for compatibility with the Directus SDK by default:
 ```bash
 # From a Schema Snapshot File
 npx directus-typeforge -i schema-snapshot.json > schema.ts
+
+# Generate from a project snapshot and patch Directus types
+npx -y github:belousovxo/directus-typeforge -i scripts/schema_snapshot.json --makeRequired=false --addTypedocNotes=false --logLevel info -o src/types/schema.ts && node scripts/patch-directus-types.mjs
 
 # From a Live Server with email/password
 npx directus-typeforge --host https://example.com --email user@example.com --password pass123 -o schema.ts
@@ -297,16 +302,20 @@ The logs contain detailed information about:
 
 ## Configuration
 
-By default, TypeForge excludes timestamps from generated files to avoid unnecessary version control changes when the schema hasn't changed. Use the `--timestamp` flag if you want to include generation timestamps:
+By default, TypeForge excludes timestamps from generated files to avoid
+unnecessary version control changes when the schema hasn't changed. Use the
+`--timestamp` flag if you want to include generation timestamps:
 
 ```bash
 # Include timestamp in output header
 npx directus-typeforge -i schema-snapshot.json --timestamp -o ./types/schema.ts
 ```
 
-For programmatic use, configuration options are available in `src/config/index.ts`:
+For programmatic use, configuration options are available in
+`src/config/index.ts`:
 
-- `OUTPUT_CONFIG.INCLUDE_TIMESTAMP`: Controls whether timestamps are included (default: `false`)
+- `OUTPUT_CONFIG.INCLUDE_TIMESTAMP`: Controls whether timestamps are included
+  (default: `false`)
 - `DEFAULT_OPTIONS`: Control default CLI option values
 
 ## Caveats
