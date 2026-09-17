@@ -244,6 +244,12 @@ export class TypeDefinitionGenerator {
    * Add a type definition to the map
    */
   private addTypeDefinition(name: string, lines: string[]): void {
+    if (this.typeDefinitions.has(name)) {
+      throw new Error(
+        `Duplicate generated type name "${name}". Collection names must resolve to unique TypeScript identifiers.`
+      );
+    }
+
     // Join lines with newlines
     const content = lines.join("\n") + "\n\n";
     

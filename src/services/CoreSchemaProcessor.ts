@@ -1051,10 +1051,34 @@ export class CoreSchemaProcessor {
       return typeName;
     }
     
-    // For regular collections, convert to PascalCase singular (unless it's a singleton)
+    // For regular collections, convert to PascalCase singular (unless it's a singleton).
+    // If two concrete collections collapse to the same singular name (for example,
+    // `stock` and `stocks`), preserve their original plurality so each collection
+    // keeps a distinct generated type.
     const isSingletonCollection = this.isSingleton(collectionName);
     const pascalName = toPascalCase(collectionName);
-    const typeName = isSingletonCollection ? pascalName : this.makeSingular(pascalName);
+    const singularName = isSingletonCollection
+      ? pascalName
+      : this.makeSingular(pascalName);
+    const hasTypeNameCollision =
+      !this.shouldSkipCollection(collectionName) &&
+      this.snapshot.data.collections.some((collection) => {
+        if (
+          collection.collection === collectionName ||
+          collection.collection.startsWith("directus_") ||
+          this.shouldSkipCollection(collection.collection)
+        ) {
+          return false;
+        }
+
+        const otherPascalName = toPascalCase(collection.collection);
+        const otherTypeName = this.isSingleton(collection.collection)
+          ? otherPascalName
+          : this.makeSingular(otherPascalName);
+
+        return otherTypeName === singularName;
+      });
+    const typeName = hasTypeNameCollision ? pascalName : singularName;
     this.collectionTypes.set(collectionName, typeName);
     return typeName;
   }
